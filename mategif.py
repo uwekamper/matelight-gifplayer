@@ -12,6 +12,9 @@ UDP_PORT = 1337
 
 ROWS = 16
 COLS = 40
+
+BRIGHTNESS = 1.0
+GAMMA = 2.0
     
 def send_array(data, hostname):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -25,6 +28,9 @@ def prepare_message(data, unpack=False):
     data_as_bytes = bytearray()
     if unpack:
         for r, g, b, a in data:
+            r = int(((r/255.0) ** GAMMA) * 255)
+            g = int(((g/255.0) ** GAMMA) * 255)
+            b = int(((b/255.0) ** GAMMA) * 255)
             data_as_bytes += bytearray([r,g,b])
     else:
         data_as_bytes = bytearray(data)
@@ -47,7 +53,10 @@ def make_gradient(hue):
         v = (i * step_size) / 255.0
         color = int(i * step_size)
         (r, g, b) = colorsys.hsv_to_rgb(h, s, v)
-        array += [int(r * 255), int(g * 255), int(b * 255)]
+        r = r ** GAMMA
+        g = g ** GAMMA
+        b = b ** GAMMA
+        array += [int(r * 255 * BRIGHTNESS), int(g * 255 * BRIGHTNESS), int(b * 255 * BRIGHTNESS)]
     return array
     
 def cycle_hue():
