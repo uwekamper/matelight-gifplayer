@@ -7,15 +7,15 @@ from PIL import Image, GifImagePlugin, ImageSequence, ImageOps
 import time
 import sys
 
-UDP_IP = "10.0.0.200"
+# UDP_IP = "10.0.0.200"
 UDP_PORT = 1337
 
 ROWS = 16
 COLS = 40
     
-def send_array(data):
+def send_array(data, hostname):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(data, (UDP_IP, UDP_PORT))
+    sock.sendto(data, (hostname, UDP_PORT))
 
 def prepare_message(data, unpack=False):
     """Prepares the pixel data for transmission over UDP
@@ -59,7 +59,7 @@ def cycle_hue():
         message = prepare_message(data)
         send_array(message)
         
-def show_gif(filename):
+def show_gif(filename, hostname):
     img = Image.open(filename)
     palette = img.getpalette()
     last_frame = Image.new("RGBA", img.size)
@@ -85,7 +85,7 @@ def show_gif(filename):
             #im.thumbnail((tw, th), Image.NEAREST)
         data=list(im.getdata())
         message = prepare_message(data, unpack=True)
-        send_array(message)     
+        send_array(message, hostname)     
         time.sleep(sleep_time)   
         # data = np.array(im.getdata(), dtype=np.uint8)
             
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         print "Transmitting '%s' to %s (press Ctrl+C to abort) ..." % (filename, hostname)
         try:
             while True:
-                show_gif(filename)
+                show_gif(filename, hostname)
         except KeyboardInterrupt:
             print " Goodbye!"
     
