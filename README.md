@@ -7,8 +7,11 @@ Installation
 ------------
 
 git clone ...
+
 cd $cloned-directory
+
 virtualenv --distribute --no-site-packages .
+
 pip install -r requirements.txt
 
 Usage
