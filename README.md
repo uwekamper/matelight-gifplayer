@@ -2,6 +2,7 @@ matelight-gifplayer
 ===================
 
 Plays and loops an animated gif file on the Matelight display.
+Plays and loops an animated gif file on the Matelight display via the Matelight CRAP protocol.
 
 Installation
 ------------
