@@ -13,14 +13,14 @@ UDP_PORT = 1337
 ROWS = 16
 COLS = 40
 
-BRIGHTNESS = 0.1
-GAMMA = 2.0
+BRIGHTNESS = 0.25
+GAMMA = 1.0
     
 def send_array(data, hostname):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(data, (hostname, UDP_PORT))
 
-def prepare_message(data, unpack=False):
+def prepare_message(data, unpack=False, gamma=GAMMA):
     """Prepares the pixel data for transmission over UDP
     """
     # 4 bytes for future use as a crc32 checksum in network byte order.
@@ -28,9 +28,9 @@ def prepare_message(data, unpack=False):
     data_as_bytes = bytearray()
     if unpack:
         for r, g, b, a in data:
-            r = int(((r/255.0) ** GAMMA) * 255)
-            g = int(((g/255.0) ** GAMMA) * 255)
-            b = int(((b/255.0) ** GAMMA) * 255)
+            r = int(((r/255.0) ** gamma) * 255 * BRIGHTNESS)
+            g = int(((g/255.0) ** gamma) * 255 * BRIGHTNESS)
+            b = int(((b/255.0) ** gamma) * 255 * BRIGHTNESS)
             data_as_bytes += bytearray([r,g,b])
     else:
         data_as_bytes = bytearray(data)
@@ -56,7 +56,7 @@ def make_gradient(hue):
         r = r ** GAMMA
         g = g ** GAMMA
         b = b ** GAMMA
-        array += [int(r * 255 * BRIGHTNESS), int(g * 255 * BRIGHTNESS), int(b * 255 * BRIGHTNESS)]
+        array += [int(r * 255), int(g * 255), int(b * 255)]
     return array
     
 def cycle_hue():
@@ -68,7 +68,7 @@ def cycle_hue():
         message = prepare_message(data)
         send_array(message)
         
-def show_gif(filename, hostname):
+def show_gif(filename, hostname, gamma):
     img = Image.open(filename)
     palette = img.getpalette()
     last_frame = Image.new("RGBA", img.size)
@@ -93,22 +93,27 @@ def show_gif(filename, hostname):
             im = ImageOps.fit(im, (tw, th), Image.ANTIALIAS)
             #im.thumbnail((tw, th), Image.NEAREST)
         data=list(im.getdata())
-        message = prepare_message(data, unpack=True)
+        message = prepare_message(data, unpack=True, gamma=gamma)
         send_array(message, hostname)     
         time.sleep(sleep_time)   
         # data = np.array(im.getdata(), dtype=np.uint8)
             
     
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-    	print "Usage: mategif.py HOSTNAME/IPADDRESS FILENAME"
+    if len(sys.argv) < 3:
+    	print "Usage: mategif.py HOSTNAME/IPADDRESS FILENAME [GAMMA]"
     else:
         hostname = sys.argv[1]
         filename = sys.argv[2]
+        if len(sys.argv) == 4:
+            gamma = float(sys.argv[3])
+        else:
+            gamma = GAMMA
+	
         print "Transmitting '%s' to %s (press Ctrl+C to abort) ..." % (filename, hostname)
         try:
             while True:
-                show_gif(filename, hostname)
+                show_gif(filename, hostname, gamma)
         except KeyboardInterrupt:
             print " Goodbye!"
     
