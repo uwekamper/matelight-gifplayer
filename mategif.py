@@ -86,12 +86,11 @@ def show_gif(filename, hostname, gamma):
         else:
             last_frame = c
 
-        tw = 40
-        th = 16
         im = last_frame.copy()
-        if (tw, th) != (None, None):
-            im = ImageOps.fit(im, (tw, th), Image.ANTIALIAS)
-            #im.thumbnail((tw, th), Image.NEAREST)
+        tw, th = im.size
+        if (tw, th) != (40, 16):
+            im = ImageOps.fit(im, (tw, th), Image.NEAREST)
+
         data=list(im.getdata())
         message = prepare_message(data, unpack=True, gamma=gamma)
         send_array(message, hostname)     
