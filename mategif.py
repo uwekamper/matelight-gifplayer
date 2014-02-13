@@ -13,7 +13,7 @@ UDP_PORT = 1337
 ROWS = 16
 COLS = 40
 
-BRIGHTNESS = 0.25
+BRIGHTNESS = 0.2
 GAMMA = 1.0
     
 def send_array(data, hostname):
@@ -68,12 +68,14 @@ def cycle_hue():
         message = prepare_message(data)
         send_array(message)
         
-def show_gif(filename, hostname, gamma):
+def show_gif(filename, hostname, gamma, centering=0.5):
     img = Image.open(filename)
     palette = img.getpalette()
     last_frame = Image.new("RGBA", img.size)
     frames = []
-
+    
+    
+    
     for frame in ImageSequence.Iterator(img):
         #This works around a known bug in Pillow
         #See also: http://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
@@ -81,21 +83,25 @@ def show_gif(filename, hostname, gamma):
         c = frame.convert("RGBA")
         sleep_time = img.info['duration'] / 1000.0
 
-        if  'transparency' in img.info and img.info['background'] != img.info['transparency']:
-            last_frame.paste(c, c)
-        else:
-            last_frame = c
+        try:
+            if img.info['background'] != img.info['transparency']:
+                last_frame.paste(c, c)
+            else:
+                last_frame = c
+        except KeyError:
+            last_frame = c 
 
         im = last_frame.copy()
         tw, th = im.size
         if (tw, th) != (40, 16):
-            im = ImageOps.fit(im, (tw, th), Image.NEAREST)
+            im = ImageOps.fit(im, (40, 16), Image.NEAREST, centering=(0.5, centering))
+        else:
+            pass
 
         data=list(im.getdata())
         message = prepare_message(data, unpack=True, gamma=gamma)
         send_array(message, hostname)     
-        time.sleep(sleep_time)   
-        # data = np.array(im.getdata(), dtype=np.uint8)
+        time.sleep(sleep_time)         
             
     
 if __name__ == '__main__':
@@ -111,8 +117,12 @@ if __name__ == '__main__':
 	
         print "Transmitting '%s' to %s (press Ctrl+C to abort) ..." % (filename, hostname)
         try:
-            while True:
-                show_gif(filename, hostname, gamma)
+            centering = 0.5
+            while True:                
+                show_gif(filename, hostname, gamma, centering)
+                centering += 0.1
+                if centering > 1.0:
+                    centering = 0.0
         except KeyboardInterrupt:
             print " Goodbye!"
     
