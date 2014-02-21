@@ -13,7 +13,7 @@ UDP_PORT = 1337
 ROWS = 16
 COLS = 40
 
-BRIGHTNESS = 0.2
+BRIGHTNESS = 1.0
 GAMMA = 1.0
     
 def send_array(data, hostname):
