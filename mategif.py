@@ -15,6 +15,8 @@ COLS = 40
 
 BRIGHTNESS = 1.0
 GAMMA = 1.0
+
+loop_last_frame = False
     
 def send_array(data, hostname):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -73,8 +75,7 @@ def show_gif(filename, hostname, gamma, centering=0.5):
     palette = img.getpalette()
     last_frame = Image.new("RGBA", img.size)
     frames = []
-    
-    
+    message = None
     
     for frame in ImageSequence.Iterator(img):
         #This works around a known bug in Pillow
@@ -82,12 +83,14 @@ def show_gif(filename, hostname, gamma, centering=0.5):
         frame.putpalette(palette)
         c = frame.convert("RGBA")
         sleep_time = img.info['duration'] / 1000.0
-
+        
+        # print img.info['background'], img.info['transparency']
         try:
             if img.info['background'] != img.info['transparency']:
                 last_frame.paste(c, c)
             else:
-                last_frame = c
+                last_frame.paste(c, c)
+                # last_frame = c
         except KeyError:
             last_frame = c 
 
@@ -102,6 +105,11 @@ def show_gif(filename, hostname, gamma, centering=0.5):
         message = prepare_message(data, unpack=True, gamma=gamma)
         send_array(message, hostname)     
         time.sleep(sleep_time)         
+
+    if loop_last_frame and message is not None:
+        while True:
+            message = prepare_message(data, unpack=True, gamma=gamma)
+            send_array(message, hostname)
             
     
 if __name__ == '__main__':
@@ -111,7 +119,11 @@ if __name__ == '__main__':
         hostname = sys.argv[1]
         filename = sys.argv[2]
         if len(sys.argv) == 4:
-            gamma = float(sys.argv[3])
+            if sys.argv[3] == '-l':
+                loop_last_frame = True
+                gamma = GAMMA
+            else:
+                gamma = float(sys.argv[3])
         else:
             gamma = GAMMA
 	
