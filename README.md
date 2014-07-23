@@ -7,15 +7,15 @@ via the Matelight CRAP protocol.
 Installation
 ------------
 
-git clone ...
-
-cd $cloned-directory
-
-virtualenv --distribute --no-site-packages .
-
-pip install -r requirements.txt
+  git clone ...
+  cd $cloned-directory
+  virtualenv --distribute --no-site-packages .
+  pip install -r requirements.txt
 
 Usage
 -----
 
-./mategif.py 10.0.1.39 hackandtell.gif
+./mategif.py HOSTNAME PATH/TO/ANIMATED.GIF
+
+Example:
+./mategif.py ml.jaseg.net gifs/flappy.gif
