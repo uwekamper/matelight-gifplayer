@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import socket
@@ -114,7 +114,7 @@ def show_gif(filename, hostname, gamma, centering=0.5):
     
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-    	print "Usage: mategif.py HOSTNAME/IPADDRESS FILENAME [GAMMA]"
+    	print("Usage: mategif.py HOSTNAME/IPADDRESS FILENAME [GAMMA]")
     else:
         hostname = sys.argv[1]
         filename = sys.argv[2]
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         else:
             gamma = GAMMA
 	
-        print "Transmitting '%s' to %s (press Ctrl+C to abort) ..." % (filename, hostname)
+        print("Transmitting '%s' to %s (press Ctrl+C to abort) ..." % (filename, hostname))
         try:
             centering = 0.5
             while True:                
@@ -136,5 +136,5 @@ if __name__ == '__main__':
                 if centering > 1.0:
                     centering = 0.0
         except KeyboardInterrupt:
-            print " Goodbye!"
+            print(" Goodbye!")
     
